@@ -13,6 +13,7 @@ const Home = () => {
   const [retry, setRetry] = useState(0);
   // Number of retries left
   const [retryCount, setRetryCount] = useState(maxRetries);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const onChange = (event) => {
     setInput(event.target.value);
@@ -20,6 +21,10 @@ const Home = () => {
 
   const generateAction = async () => {
     console.log('Generating...');
+
+    if (isGenerating && retry === 0) return;
+
+    setIsGenerating(true);
 
     // If this is a retry request, take away retryCount
     if (retry > 0) {
@@ -59,6 +64,9 @@ const Home = () => {
 
   // Set image data into state property
   setImg(data.image);
+
+  // Everything is all done -- stop loading!
+  setIsGenerating(false);
 
   };
 
@@ -106,9 +114,20 @@ const Home = () => {
           <div className="prompt-container">
             <input className="prompt-box" value={input} onChange={onChange} />
             <div className="prompt-buttons">
-              <a className="generate-button" onClick={generateAction}>
+              {/* Tweak classNames to change classes */}
+              <a
+                className={
+                  isGenerating ? 'generate-button loading' : 'generate-button'
+                }
+                onClick={generateAction}
+              >
+                {/* Tweak to show a loading indicator */}
                 <div className="generate">
-                  <p>Generate</p>
+                  {isGenerating ? (
+                    <span className="loader"></span>
+                  ) : (
+                    <p>Generate</p>
+                  )}
                 </div>
               </a>
             </div>
