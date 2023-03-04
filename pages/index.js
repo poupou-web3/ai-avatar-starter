@@ -11,6 +11,10 @@ const Home = () => {
     setInput(event.target.value);
   };
 
+  const generateAction = async () => {
+    console.log('Generating...');	
+  }
+
   return (
     <div className="root">
       <Head>
@@ -26,6 +30,13 @@ const Home = () => {
           </div>
           <div className="prompt-container">
             <input className="prompt-box" value={input} onChange={onChange} />
+            <div className="prompt-buttons">
+              <a className="generate-button" onClick={generateAction}>
+                <div className="generate">
+                  <p>Generate</p>
+                </div>
+              </a>
+            </div>
           </div>
         </div>
       </div>
