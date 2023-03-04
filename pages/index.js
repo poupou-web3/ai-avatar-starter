@@ -14,6 +14,7 @@ const Home = () => {
   // Number of retries left
   const [retryCount, setRetryCount] = useState(maxRetries);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [finalPrompt, setFinalPrompt] = useState('');
 
   const onChange = (event) => {
     setInput(event.target.value);
@@ -61,6 +62,12 @@ const Home = () => {
     console.log(`Error: ${data.error}`);
     return;
   }
+
+  
+  // Set final prompt here
+  setFinalPrompt(input);
+  // Remove content from input box
+  setInput('');
 
   // Set image data into state property
   setImg(data.image);
@@ -134,6 +141,15 @@ const Home = () => {
           </div>
         </div>
       </div>
+
+      {img && (
+        <div className="output-content">
+          <Image src={img} width={512} height={512} alt={finalPrompt} />
+          {/* Add prompt here */}
+          <p>{finalPrompt}</p>
+        </div>
+      )}
+
       <div className="badge-container grow">
         <a
           href="https://buildspace.so/builds/ai-avatar"
