@@ -1,19 +1,94 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import buildspaceLogo from '../assets/buildspace-logo.png';
 
 const Home = () => {
 
+  const maxRetries = 5;
   const [input, setInput] = useState('');
+
+  const [img, setImg] = useState(''); 
+  // Numbers of retries 
+  const [retry, setRetry] = useState(0);
+  // Number of retries left
+  const [retryCount, setRetryCount] = useState(maxRetries);
 
   const onChange = (event) => {
     setInput(event.target.value);
   };
 
   const generateAction = async () => {
-    console.log('Generating...');	
+    console.log('Generating...');
+
+    // If this is a retry request, take away retryCount
+    if (retry > 0) {
+      setRetryCount((prevState) => {
+        if (prevState === 0) {
+          return 0;
+        } else {
+          return prevState - 1;
+        }
+      });
+
+      setRetry(0);
+    }
+
+    // Add the fetch request
+  const response = await fetch('/api/generate', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'image/jpeg',
+    },
+    body: JSON.stringify({ input }),
+  });
+
+  const data = await response.json();
+
+  // If model still loading, drop that retry time
+  if (response.status === 503) {
+    console.log('Model is loading still :(.')
+    return;
   }
+
+  // If another error, drop error
+  if (!response.ok) {
+    console.log(`Error: ${data.error}`);
+    return;
+  }
+
+  // Set image data into state property
+  setImg(data.image);
+
+  };
+
+  const sleep = (ms) => {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+  };
+
+  useEffect(() => {
+    const runRetry = async () => {
+      if (retryCount === 0) {
+        console.log(`Model still loading after ${maxRetries} retries. Try request again in 5 minutes.`);
+        setRetryCount(maxRetries);
+        return;
+        }
+
+      console.log(`Trying again in ${retry} seconds.`);
+
+      await sleep(retry * 1000);
+
+      await generateAction();
+    };
+
+    if (retry === 0) {
+      return;
+    }
+
+    runRetry();
+  }, [retry]);
 
   return (
     <div className="root">
